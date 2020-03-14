@@ -42,6 +42,7 @@ import {
 } from 'vscode-languageserver';
 
 import { Logger } from './Logger';
+import { parseDocument } from './parseDocument';
 
 type Options = {
   // port for the LSP server to run on
@@ -52,6 +53,7 @@ type Options = {
   configDir?: string;
   // array of functions to transform the graphql-config and add extensions dynamically
   extensions?: Array<(config: GraphQLConfig) => GraphQLConfig>;
+  parser?: typeof parseDocument;
 };
 ('graphql-language-service-types');
 
