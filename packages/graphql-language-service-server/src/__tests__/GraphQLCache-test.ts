@@ -14,10 +14,14 @@ import { GraphQLSchema } from 'graphql/type';
 import { parse } from 'graphql/language';
 import { loadConfig } from 'graphql-config';
 import fetchMock from 'fetch-mock';
-import { introspectionFromSchema } from 'graphql';
-
-import { GraphQLCache } from '../GraphQLCache';
+import {
+  introspectionFromSchema,
+  FragmentDefinitionNode,
+  TypeDefinitionNode,
+} from 'graphql';
+import { GraphQLCache, getGraphQLCache } from '../GraphQLCache';
 import { getQueryAndRange } from '../MessageProcessor';
+import { FragmentInfo, ObjectTypeInfo } from 'graphql-language-service-types';
 
 function wihtoutASTNode(definition: any) {
   const result = { ...definition };
@@ -31,13 +35,28 @@ describe('GraphQLCache', () => {
   let cache = new GraphQLCache(configDir, graphQLRC);
 
   beforeEach(async () => {
-    const configDir = __dirname;
     graphQLRC = await loadConfig({ rootDir: configDir });
     cache = new GraphQLCache(configDir, graphQLRC);
   });
 
   afterEach(() => {
     fetchMock.restore();
+  });
+
+  describe('getGraphQLCache', () => {
+    it('should apply extensions', async () => {
+      const extension = config => {
+        return {
+          ...config,
+          extension: 'extension-used', // Just adding a key to the config to demo extension usage
+        };
+      };
+      const extensions = [extension];
+      const cacheWithExtensions = await getGraphQLCache(configDir, extensions);
+      const config = cacheWithExtensions.getGraphQLConfig();
+      expect('extension' in config).toBe(true);
+      expect((config as any).extension).toBe('extension-used');
+    });
   });
 
   describe('getSchema', () => {
@@ -120,17 +139,17 @@ describe('GraphQLCache', () => {
 
     const catDefinition = parse(catContent).definitions[0];
 
-    const fragmentDefinitions = new Map();
+    const fragmentDefinitions = new Map<string, FragmentInfo>();
     fragmentDefinitions.set('Duck', {
       file: 'someFilePath',
       content: duckContent,
       definition: duckDefinition,
-    });
+    } as FragmentInfo);
     fragmentDefinitions.set('Cat', {
       file: 'someOtherFilePath',
       content: catContent,
-      definition: catDefinition,
-    });
+      definition: catDefinition as FragmentDefinitionNode,
+    } as FragmentInfo);
 
     it('finds fragments referenced in Relay queries', async () => {
       const text =
@@ -198,7 +217,7 @@ describe('GraphQLCache', () => {
       `;
     const parsedQuery = parse(query);
 
-    const namedTypeDefinitions = new Map();
+    const namedTypeDefinitions = new Map<string, ObjectTypeInfo>();
     namedTypeDefinitions.set('Character', {
       file: 'someOtherFilePath',
       content: query,
@@ -212,8 +231,8 @@ describe('GraphQLCache', () => {
           start: 0,
           end: 0,
         },
-      },
-    });
+      } as TypeDefinitionNode,
+    } as ObjectTypeInfo);
 
     it('finds named types referenced from the SDL', async () => {
       const result = await cache.getObjectTypeDependenciesForAST(

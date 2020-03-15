@@ -30,6 +30,8 @@ The purpose of this monorepo is to give the GraphQL Community:
 
 ## [GraphiQL](packages/graphiql#readme)
 
+> **Breaking Changes & Improvements:** several interfaces are being dropped for new ones are arriving for GraphiQL 1.0.0! Read more in [this issue](https://github.com/graphql/graphiql/issues/1165)
+
 <!-- prettier-ignore -->
 > [![NPM](https://img.shields.io/npm/v/graphiql.svg)](https://npmjs.com/graphiql)
 > ![jsDelivr hits (npm)](https://img.shields.io/jsdelivr/npm/hm/graphiql)
@@ -44,7 +46,7 @@ _/ˈɡrafək(ə)l/_ A graphical interactive in-browser GraphQL IDE. [Try the liv
 
 The GraphiQL IDE, implemented in React, currently using [GraphQL mode for CodeMirror](packages/codemirror-graphql#readme) & [GraphQL Language Service](packages/graphql-language-service#readme).
 
-**Learn more about [GraphiQL in packagages/graphiql/README.md](packages/graphiql#readme)**
+**Learn more about [GraphiQL in packages/graphiql/README.md](packages/graphiql#readme)**
 
 ### How To Setup/Implement GraphiQL
 
